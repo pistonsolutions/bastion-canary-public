@@ -1,0 +1,1 @@
+{"mcpServers":{"prmarker":{"type":"local","command":"python3","args":["pr_marker/server.py"],"tools":["*"]}}}
