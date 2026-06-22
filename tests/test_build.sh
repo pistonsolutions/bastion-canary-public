@@ -11,6 +11,8 @@ server_pid=""
 fallback_log=""
 remote_log=""
 retry_log=""
+MAX_SERVER_STARTUP_ATTEMPTS=50
+UNREACHABLE_PORT=9 # discard service; typically unavailable for HTTP fetches
 
 cleanup() {
   rm -f "${tmp_json}" 2>/dev/null || true
@@ -33,7 +35,7 @@ remote_log=$(mktemp -t test_build_remote.XXXXXX.log)
 retry_log=$(mktemp -t test_build_retry.XXXXXX.log)
 
 rm -rf .build/output
-BUILD_STATUS_URL="http://127.0.0.1:9/unreachable" ./scripts/build.sh >"${fallback_log}" 2>&1
+BUILD_STATUS_URL="http://127.0.0.1:${UNREACHABLE_PORT}/unreachable" ./scripts/build.sh >"${fallback_log}" 2>&1
 cmp -s build-status.json .build/output/build-status.json || { echo "Fallback test failed: files differ"; exit 1; }
 
 tmp_json=$(mktemp)
@@ -88,7 +90,7 @@ PY
 COUNT_FILE="${count_file}" PORT_FILE="${port_file}" python "${server_dir}/server.py" &
 server_pid=$!
 
-for _ in $(seq 1 50); do
+for _ in $(seq 1 "${MAX_SERVER_STARTUP_ATTEMPTS}"); do
   [[ -s "${port_file}" ]] && break
   sleep 0.1
 done
