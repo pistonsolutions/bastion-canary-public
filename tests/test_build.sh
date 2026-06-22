@@ -35,7 +35,7 @@ rm -rf "${ROOT_DIR}/.build/output" "${ROOT_DIR}/.build/cache"
 mkdir -p "${ROOT_DIR}/.build"
 
 LOG_FILE="${ROOT_DIR}/.build/test-build.log"
-BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null 2>"${LOG_FILE}"
+BUILD_STATUS_URL="https://invalid.test/unreachable" bash "${BUILD_SCRIPT}" >/dev/null 2>"${LOG_FILE}"
 grep -q "remote status fetch failed" "${LOG_FILE}"
 grep -q "fallback source missing: ${ROOT_DIR}/.build/cache/build-status.json" "${LOG_FILE}"
 assert_file_equals "${OUTPUT_FILE}" "${ROOT_DIR}/build-status.json"
@@ -47,14 +47,18 @@ cat > "${ROOT_DIR}/.build/cache/build-status.json" <<'JSON'
 }
 JSON
 
-BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
+BUILD_STATUS_URL="https://invalid.test/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
 assert_json_status "${OUTPUT_FILE}" "cached"
 
+if [ ! -f "${ROOT_DIR}/build-status.json" ]; then
+  echo "Missing ${ROOT_DIR}/build-status.json required for fallback test setup" >&2
+  exit 1
+fi
 mv "${ROOT_DIR}/build-status.json" "${ROOT_DIR}/build-status.json.bak"
 trap 'mv "${ROOT_DIR}/build-status.json.bak" "${ROOT_DIR}/build-status.json"' EXIT
 rm -rf "${ROOT_DIR}/.build/output" "${ROOT_DIR}/.build/cache"
 
-BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
+BUILD_STATUS_URL="https://invalid.test/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
 assert_json_status "${OUTPUT_FILE}" "unknown"
 
 mv "${ROOT_DIR}/build-status.json.bak" "${ROOT_DIR}/build-status.json"

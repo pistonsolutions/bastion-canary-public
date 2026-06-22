@@ -7,7 +7,7 @@ OUTPUT_FILE="${OUTPUT_DIR}/build-status.json"
 SOURCE_FILE="${ROOT_DIR}/build-status.json"
 CACHE_FILE="${ROOT_DIR}/.build/cache/build-status.json"
 TMP_FILE="${OUTPUT_FILE}.tmp"
-FETCH_TIMEOUT="${BUILD_STATUS_FETCH_TIMEOUT:-10}"
+REMOTE_FETCH_TIMEOUT="${BUILD_STATUS_FETCH_TIMEOUT:-10}"
 
 mkdir -p "${OUTPUT_DIR}" "${ROOT_DIR}/.build/cache"
 
@@ -20,7 +20,7 @@ fetch_remote() {
     return 1
   fi
 
-  curl --fail --silent --show-error --location --max-time "${FETCH_TIMEOUT}" "${url}" -o "${TMP_FILE}" || {
+  curl --fail --silent --show-error --location --max-time "${REMOTE_FETCH_TIMEOUT}" "${url}" -o "${TMP_FILE}" || {
     curl_exit_code=$?
     printf 'remote status fetch failed (curl exit %s); using fallback\n' "${curl_exit_code}" >&2
     return 1
