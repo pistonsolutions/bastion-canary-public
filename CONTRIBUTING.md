@@ -11,7 +11,7 @@
    ```bash
    git add .build/env-manifest.b64 && git commit -m "chore: record build environment manifest" && git push
    ```
-   If `git commit` reports no changes, the manifest is already recorded for the current environment and you can proceed.
+   If `git commit` reports no changes, the manifest content is identical to what is already committed for the current environment and you can proceed.
 2. Run the reproducible build script:
    ```bash
    ./scripts/build.sh
