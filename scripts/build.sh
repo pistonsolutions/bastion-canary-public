@@ -37,9 +37,15 @@ with open(output_path, "w", encoding="utf-8", newline="\n") as output_file:
     output_file.write("\n")
 PY
 
-  cat > "${CACHE_KEY_DIR}/build-status.json.meta" <<META
-{"build_key":"${BUILD_KEY}","source":"build-status.json"}
-META
+  python3 - "${BUILD_KEY}" "${CACHE_KEY_DIR}/build-status.json.meta" <<'PY'
+import json
+import sys
+
+build_key, output_path = sys.argv[1], sys.argv[2]
+with open(output_path, "w", encoding="utf-8", newline="\n") as output_file:
+    json.dump({"build_key": build_key, "source": "build-status.json"}, output_file, sort_keys=True, separators=(",", ":"))
+    output_file.write("\n")
+PY
 fi
 
 cp "${CACHE_OUTPUT}" "${OUTPUT_FILE}"

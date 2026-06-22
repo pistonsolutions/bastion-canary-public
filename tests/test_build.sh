@@ -8,7 +8,8 @@ OUTPUT_FILE="${ROOT_DIR}/.build/output/build-status.json"
 BUILD_KEY_FILE="${ROOT_DIR}/.build/output/build-key.txt"
 
 "${PREFLIGHT_SCRIPT}" >/dev/null
-rm -rf "${ROOT_DIR}/.build/cache" "${ROOT_DIR}/.build/output"
+if [[ -d "${ROOT_DIR}/.build/cache" ]]; then rm -rf "${ROOT_DIR}/.build/cache"; fi
+if [[ -d "${ROOT_DIR}/.build/output" ]]; then rm -rf "${ROOT_DIR}/.build/output"; fi
 
 "${BUILD_SCRIPT}" >/dev/null
 FIRST_HASH="$(sha256sum "${OUTPUT_FILE}" | awk '{print $1}')"
