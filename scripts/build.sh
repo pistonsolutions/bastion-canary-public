@@ -41,7 +41,7 @@ fetch_remote() {
 
     if (( attempt < RETRIES )); then
       sleep_seconds=1
-      for _ in $(seq 2 "${attempt}"); do
+      for _ in $(seq 1 $((attempt - 1))); do
         sleep_seconds=$((sleep_seconds * 2))
         if (( sleep_seconds >= MAX_BACKOFF )); then
           sleep_seconds=${MAX_BACKOFF}

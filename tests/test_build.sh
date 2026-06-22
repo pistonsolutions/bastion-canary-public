@@ -28,9 +28,9 @@ if ! command -v python >/dev/null 2>&1; then
   exit 1
 fi
 
-fallback_log=$(mktemp /tmp/test_build_fallback.XXXXXX.log)
-remote_log=$(mktemp /tmp/test_build_remote.XXXXXX.log)
-retry_log=$(mktemp /tmp/test_build_retry.XXXXXX.log)
+fallback_log=$(mktemp -t test_build_fallback.XXXXXX.log)
+remote_log=$(mktemp -t test_build_remote.XXXXXX.log)
+retry_log=$(mktemp -t test_build_retry.XXXXXX.log)
 
 rm -rf .build/output
 BUILD_STATUS_URL="http://127.0.0.1:9/unreachable" ./scripts/build.sh >"${fallback_log}" 2>&1
@@ -42,7 +42,7 @@ rm -rf .build/output
 BUILD_STATUS_URL="file://${tmp_json}" BUILD_FETCH_RETRIES=1 ./scripts/build.sh >"${remote_log}" 2>&1
 grep -q '"status":"remote-ok"' .build/output/build-status.json || { echo "Remote fetch test failed: expected status not found"; exit 1; }
 
-server_dir=$(mktemp -d /tmp/build-retry-test.XXXXXX)
+server_dir=$(mktemp -d -t build-retry-test.XXXXXX)
 count_file="${server_dir}/count"
 port_file="${server_dir}/port"
 cat > "${server_dir}/server.py" <<'PY'
