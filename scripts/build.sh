@@ -25,6 +25,7 @@ fetch_remote() {
 
   local tmp_file
   local sleep_seconds
+  local exponent_step
   tmp_file=$(mktemp)
 
   for attempt in $(seq 1 "${RETRIES}"); do
@@ -40,11 +41,14 @@ fetch_remote() {
     fi
 
     if (( attempt < RETRIES )); then
-      if (( attempt > 30 )); then
-        sleep_seconds=${MAX_BACKOFF}
-      else
-        sleep_seconds=$((2 ** (attempt - 1)))
-      fi
+      sleep_seconds=1
+      for exponent_step in $(seq 1 $((attempt - 1))); do
+        if (( sleep_seconds >= MAX_BACKOFF )); then
+          sleep_seconds=${MAX_BACKOFF}
+          break
+        fi
+        sleep_seconds=$((sleep_seconds * 2))
+      done
       if (( sleep_seconds >= MAX_BACKOFF )); then
         sleep_seconds=${MAX_BACKOFF}
       fi

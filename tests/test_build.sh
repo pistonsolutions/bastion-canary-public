@@ -11,8 +11,9 @@ server_pid=""
 fallback_log=""
 remote_log=""
 retry_log=""
-MAX_SERVER_STARTUP_ATTEMPTS=50
-UNREACHABLE_PORT=9 # discard service; typically unavailable for HTTP fetches
+SERVER_STARTUP_TIMEOUT_SECONDS=5
+MAX_SERVER_STARTUP_ATTEMPTS=$((SERVER_STARTUP_TIMEOUT_SECONDS * 10))
+UNREACHABLE_PORT=9
 
 cleanup() {
   rm -f "${tmp_json}" 2>/dev/null || true
