@@ -1,2 +1,2 @@
 # Build
-Keep changes focused.
+Run scripts/build.sh to build.
