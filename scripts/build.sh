@@ -9,6 +9,7 @@ INPUT_FILES=(
   "$REPO_ROOT/build-status.json"
   "$REPO_ROOT/README.md"
 )
+SOURCE_ARTIFACT="${INPUT_FILES[0]}"
 
 for file in "${INPUT_FILES[@]}"; do
   if [[ ! -f "$file" ]]; then
@@ -32,7 +33,7 @@ if [[ -f "$cache_artifact" ]]; then
   echo "build cache: hit ($cache_key)"
 else
   echo "build cache: miss ($cache_key)"
-  cp "$REPO_ROOT/$ARTIFACT_NAME" "$cache_artifact"
+  cp "$SOURCE_ARTIFACT" "$cache_artifact"
 fi
 
 cp "$cache_artifact" "$output_artifact"
