@@ -52,17 +52,24 @@ assert_contains 'cache' "$fixture/.build/output/build-status.json"
 fixture="$(new_fixture)"
 mkdir -p "$fixture/web"
 printf '{"status":"url"}\n' > "$fixture/web/build-status.json"
-port="$(python3 - <<'PY'
-import socket
-s = socket.socket()
-s.bind(("127.0.0.1", 0))
-print(s.getsockname()[1])
-s.close()
-PY
-)"
 (
   cd "$fixture/web"
-  python3 -m http.server "$port" --bind 127.0.0.1 >/dev/null 2>&1 &
+  python3 - "$fixture/server.port" <<'PY' >/dev/null 2>&1 &
+import http.server
+import socketserver
+import sys
+
+port_file = sys.argv[1]
+
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        pass
+
+with socketserver.TCPServer(("127.0.0.1", 0), Handler) as server:
+    with open(port_file, "w", encoding="utf-8") as f:
+        f.write(str(server.server_address[1]))
+    server.serve_forever()
+PY
   echo $! > "$fixture/server.pid"
 )
 cleanup_server() {
@@ -71,12 +78,20 @@ cleanup_server() {
   fi
 }
 trap cleanup_server EXIT
-for _ in 1 2 3 4 5; do
+port=""
+for attempt in 1 2 3 4 5; do
+  if [ -s "$fixture/server.port" ]; then
+    port="$(cat "$fixture/server.port")"
+  fi
   if curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
     break
   fi
   sleep 0.2
 done
+if ! curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
+  echo "Failed to start local test HTTP server"
+  exit 1
+fi
 (
   cd "$fixture"
   BUILD_STATUS_URL="http://127.0.0.1:$port/build-status.json" ./scripts/build.sh >/dev/null
