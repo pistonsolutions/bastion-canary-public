@@ -53,7 +53,11 @@ status_written=false
 if [ -n "${BUILD_STATUS_URL:-}" ]; then
   case "$BUILD_STATUS_URL" in
     http://*|https://*)
-      if curl -fsSL --retry "$CURL_RETRY_COUNT" --retry-connrefused --connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIMEOUT" "$BUILD_STATUS_URL" -o "$tmp_file" 2>/dev/null && [ -s "$tmp_file" ]; then
+      fetch_succeeded=false
+      if curl -fsSL --retry "$CURL_RETRY_COUNT" --retry-connrefused --connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIMEOUT" "$BUILD_STATUS_URL" -o "$tmp_file" 2>/dev/null; then
+        [ -s "$tmp_file" ] && fetch_succeeded=true
+      fi
+      if [ "$fetch_succeeded" = true ]; then
         cp "$tmp_file" "$OUTPUT_FILE"
         cp "$tmp_file" "$CACHE_FILE"
         status_written=true

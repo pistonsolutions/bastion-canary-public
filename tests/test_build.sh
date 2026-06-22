@@ -106,7 +106,6 @@ fi
   BUILD_STATUS_URL="http://127.0.0.1:$port/build-status.json" ./scripts/build.sh >/dev/null
 )
 cleanup_server
-trap - EXIT
 assert_contains 'url' "$fixture/.build/output/build-status.json"
 assert_contains 'url' "$fixture/.build/cache/build-status.json"
 
