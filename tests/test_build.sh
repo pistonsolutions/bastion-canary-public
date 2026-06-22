@@ -8,6 +8,9 @@ cd "${REPO_ROOT}"
 tmp_json=""
 server_dir=""
 server_pid=""
+fallback_log="/tmp/test_build_fallback.log"
+remote_log="/tmp/test_build_remote.log"
+retry_log="/tmp/test_build_retry.log"
 
 cleanup() {
   rm -f "${tmp_json}" 2>/dev/null || true
@@ -16,17 +19,23 @@ cleanup() {
     wait "${server_pid}" 2>/dev/null || true
   fi
   rm -rf "${server_dir}" 2>/dev/null || true
+  rm -f "${fallback_log}" "${remote_log}" "${retry_log}" 2>/dev/null || true
 }
 trap cleanup EXIT
 
+if ! command -v python >/dev/null 2>&1; then
+  echo "python is required for build.sh tests"
+  exit 1
+fi
+
 rm -rf .build/output
-BUILD_STATUS_URL="http://127.0.0.1:9/unreachable" ./scripts/build.sh >/tmp/test_build_fallback.log 2>&1
+BUILD_STATUS_URL="http://127.0.0.1:9/unreachable" ./scripts/build.sh >"${fallback_log}" 2>&1
 cmp -s build-status.json .build/output/build-status.json || { echo "Fallback test failed: files differ"; exit 1; }
 
 tmp_json=$(mktemp)
 printf '{"status":"remote-ok"}\n' > "${tmp_json}"
 rm -rf .build/output
-BUILD_STATUS_URL="file://${tmp_json}" BUILD_FETCH_RETRIES=1 ./scripts/build.sh >/tmp/test_build_remote.log 2>&1
+BUILD_STATUS_URL="file://${tmp_json}" BUILD_FETCH_RETRIES=1 ./scripts/build.sh >"${remote_log}" 2>&1
 grep -q '"status":"remote-ok"' .build/output/build-status.json || { echo "Remote fetch test failed: expected status not found"; exit 1; }
 
 server_dir=$(mktemp -d /tmp/build-retry-test.XXXXXX)
@@ -84,7 +93,7 @@ done
 port=$(cat "${port_file}")
 
 rm -rf .build/output
-BUILD_STATUS_URL="http://127.0.0.1:${port}/status" BUILD_FETCH_RETRIES=2 BUILD_MAX_BACKOFF=1 ./scripts/build.sh >/tmp/test_build_retry.log 2>&1
+BUILD_STATUS_URL="http://127.0.0.1:${port}/status" BUILD_FETCH_RETRIES=2 BUILD_MAX_BACKOFF=1 ./scripts/build.sh >"${retry_log}" 2>&1
 grep -q '"status":"retry-ok"' .build/output/build-status.json || { echo "Retry test failed: expected status not found"; exit 1; }
 
 echo "build.sh tests passed"

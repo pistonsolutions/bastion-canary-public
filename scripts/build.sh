@@ -13,6 +13,11 @@ MAX_BACKOFF=${BUILD_MAX_BACKOFF:-4}
 
 mkdir -p "${OUTPUT_DIR}"
 
+if ! command -v python >/dev/null 2>&1; then
+  echo "python is required for JSON validation" >&2
+  exit 1
+fi
+
 fetch_remote() {
   if [[ -z "${REMOTE_URL}" ]]; then
     return 1
