@@ -3,6 +3,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT_UNDER_TEST="$REPO_ROOT/scripts/build.sh"
+MAX_SERVER_STARTUP_ATTEMPTS=5
+SERVER_POLL_INTERVAL_SECONDS=0.2
 
 assert_contains() {
   local needle="$1"
@@ -79,14 +81,14 @@ cleanup_server() {
 }
 trap cleanup_server EXIT
 port=""
-for _ in 1 2 3 4 5; do
+for _ in $(seq 1 "$MAX_SERVER_STARTUP_ATTEMPTS"); do
   if [ -s "$fixture/server.port" ]; then
     port="$(cat "$fixture/server.port")"
   fi
   if [ -n "$port" ] && curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
     break
   fi
-  sleep 0.2
+  sleep "$SERVER_POLL_INTERVAL_SECONDS"
 done
 if ! curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
   echo "Failed to start local test HTTP server"

@@ -8,6 +8,9 @@ OUTPUT_FILE="$OUTPUT_DIR/build-status.json"
 CACHE_FILE="$CACHE_DIR/build-status.json"
 REPO_STATUS_FILE="$ROOT_DIR/build-status.json"
 DIAG_FILE="$OUTPUT_DIR/runtime-network-diagnostics.txt"
+CURL_RETRY_COUNT=2
+CURL_CONNECT_TIMEOUT=5
+CURL_MAX_TIMEOUT=20
 
 mkdir -p "$OUTPUT_DIR" "$CACHE_DIR"
 
@@ -49,7 +52,7 @@ status_written=false
 if [ -n "${BUILD_STATUS_URL:-}" ]; then
   case "$BUILD_STATUS_URL" in
     http://*|https://*)
-      if curl -fsSL --retry 2 --retry-connrefused --connect-timeout 5 --max-time 20 "$BUILD_STATUS_URL" -o "$tmp_file" 2>/dev/null && [ -s "$tmp_file" ]; then
+      if curl -fsSL --retry "$CURL_RETRY_COUNT" --retry-connrefused --connect-timeout "$CURL_CONNECT_TIMEOUT" --max-time "$CURL_MAX_TIMEOUT" "$BUILD_STATUS_URL" -o "$tmp_file" 2>/dev/null && [ -s "$tmp_file" ]; then
         cp "$tmp_file" "$OUTPUT_FILE"
         cp "$tmp_file" "$CACHE_FILE"
         status_written=true
