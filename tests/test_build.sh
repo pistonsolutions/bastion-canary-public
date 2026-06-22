@@ -65,12 +65,24 @@ PY
   python3 -m http.server "$port" --bind 127.0.0.1 >/dev/null 2>&1 &
   echo $! > "$fixture/server.pid"
 )
-sleep 1
+cleanup_server() {
+  if [ -f "$fixture/server.pid" ]; then
+    kill "$(cat "$fixture/server.pid")" >/dev/null 2>&1 || true
+  fi
+}
+trap cleanup_server EXIT
+for _ in 1 2 3 4 5; do
+  if curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 0.2
+done
 (
   cd "$fixture"
   BUILD_STATUS_URL="http://127.0.0.1:$port/build-status.json" ./scripts/build.sh >/dev/null
 )
-kill "$(cat "$fixture/server.pid")" >/dev/null 2>&1 || true
+cleanup_server
+trap - EXIT
 assert_contains 'url' "$fixture/.build/output/build-status.json"
 assert_contains 'url' "$fixture/.build/cache/build-status.json"
 

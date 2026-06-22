@@ -26,7 +26,7 @@ probe_url() {
 github_probe="$(probe_url "https://github.com")"
 api_probe="$(probe_url "https://api.github.com")"
 
-cat > "$DIAG_FILE" <<EOF2
+cat > "$DIAG_FILE" <<DIAGNOSTICS_EOF
 timestamp_utc=$timestamp_utc
 hostname=$hostname_value
 user=$user_value
@@ -36,7 +36,7 @@ ip_route_head=$route_value
 github_head=$github_probe
 api_github_head=$api_probe
 build_status_url=${BUILD_STATUS_URL:-}
-EOF2
+DIAGNOSTICS_EOF
 
 tmp_file="$(mktemp)"
 cleanup() {
