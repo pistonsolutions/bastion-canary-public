@@ -11,6 +11,7 @@ DIAG_FILE="$OUTPUT_DIR/runtime-network-diagnostics.txt"
 CURL_RETRY_COUNT=2
 CURL_CONNECT_TIMEOUT=5
 CURL_MAX_TIMEOUT=20
+MAX_ROUTE_LINES=5
 
 mkdir -p "$OUTPUT_DIR" "$CACHE_DIR"
 
@@ -19,7 +20,7 @@ hostname_value="$(hostname 2>/dev/null || true)"
 kernel_value="$(uname -a 2>/dev/null || true)"
 user_value="$(id 2>/dev/null || true)"
 dns_value="$(awk '/^nameserver/{print $2}' /etc/resolv.conf 2>/dev/null | paste -sd ',' - || true)"
-route_value="$(ip route 2>/dev/null | sed -n '1,5p' | tr '\n' ';')"
+route_value="$(ip route 2>/dev/null | sed -n "1,${MAX_ROUTE_LINES}p" | tr '\n' ';')"
 
 probe_url() {
   local url="$1"

@@ -16,6 +16,11 @@ assert_contains() {
   fi
 }
 
+server_is_ready() {
+  local port="$1"
+  [ -n "$port" ] && curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1
+}
+
 run_build() {
   local dir="$1"
   (
@@ -81,16 +86,18 @@ cleanup_server() {
 }
 trap cleanup_server EXIT
 port=""
-for _ in $(seq 1 "$MAX_SERVER_STARTUP_ATTEMPTS"); do
+attempt=1
+while [ "$attempt" -le "$MAX_SERVER_STARTUP_ATTEMPTS" ]; do
   if [ -s "$fixture/server.port" ]; then
     port="$(cat "$fixture/server.port")"
   fi
-  if [ -n "$port" ] && curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
+  if server_is_ready "$port"; then
     break
   fi
   sleep "$SERVER_POLL_INTERVAL_SECONDS"
+  attempt=$((attempt + 1))
 done
-if ! curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
+if ! server_is_ready "$port"; then
   echo "Failed to start local test HTTP server"
   exit 1
 fi
