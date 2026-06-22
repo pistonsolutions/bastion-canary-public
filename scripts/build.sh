@@ -9,6 +9,7 @@ REMOTE_URL=${BUILD_STATUS_URL:-""}
 RETRIES=${BUILD_FETCH_RETRIES:-3}
 CONNECT_TIMEOUT=${BUILD_CONNECT_TIMEOUT:-5}
 MAX_TIME=${BUILD_FETCH_TIMEOUT:-20}
+MAX_BACKOFF=${BUILD_MAX_BACKOFF:-4}
 
 mkdir -p "${OUTPUT_DIR}"
 
@@ -27,7 +28,11 @@ fetch_remote() {
         return 0
       fi
     fi
-    sleep "${attempt}"
+    sleep_seconds=$((1 << (attempt - 1)))
+    if (( sleep_seconds > MAX_BACKOFF )); then
+      sleep_seconds=${MAX_BACKOFF}
+    fi
+    sleep "${sleep_seconds}"
   done
 
   rm -f "${tmp_file}"
