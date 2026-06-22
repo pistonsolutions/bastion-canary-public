@@ -8,9 +8,9 @@ cd "${REPO_ROOT}"
 tmp_json=""
 server_dir=""
 server_pid=""
-fallback_log="/tmp/test_build_fallback.log"
-remote_log="/tmp/test_build_remote.log"
-retry_log="/tmp/test_build_retry.log"
+fallback_log=""
+remote_log=""
+retry_log=""
 
 cleanup() {
   rm -f "${tmp_json}" 2>/dev/null || true
@@ -27,6 +27,10 @@ if ! command -v python >/dev/null 2>&1; then
   echo "python is required for build.sh tests"
   exit 1
 fi
+
+fallback_log=$(mktemp /tmp/test_build_fallback.XXXXXX.log)
+remote_log=$(mktemp /tmp/test_build_remote.XXXXXX.log)
+retry_log=$(mktemp /tmp/test_build_retry.XXXXXX.log)
 
 rm -rf .build/output
 BUILD_STATUS_URL="http://127.0.0.1:9/unreachable" ./scripts/build.sh >"${fallback_log}" 2>&1

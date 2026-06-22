@@ -29,17 +29,25 @@ fetch_remote() {
 
   for attempt in $(seq 1 "${RETRIES}"); do
     if curl -fsSL --connect-timeout "${CONNECT_TIMEOUT}" --max-time "${MAX_TIME}" "${REMOTE_URL}" -o "${tmp_file}"; then
-      if [[ -s "${tmp_file}" ]] && python -m json.tool "${tmp_file}" >/dev/null 2>&1; then
+      if [[ ! -s "${tmp_file}" ]]; then
+        echo "warning: empty response from ${REMOTE_URL} (attempt ${attempt}/${RETRIES})" >&2
+      elif ! python -m json.tool "${tmp_file}" >/dev/null 2>&1; then
+        echo "warning: invalid JSON from ${REMOTE_URL} (attempt ${attempt}/${RETRIES})" >&2
+      else
         mv "${tmp_file}" "${OUTPUT_FILE}"
         return 0
       fi
     fi
 
     if (( attempt < RETRIES )); then
-      sleep_seconds=$((1 << (attempt - 1)))
-      if (( sleep_seconds > MAX_BACKOFF )); then
-        sleep_seconds=${MAX_BACKOFF}
-      fi
+      sleep_seconds=1
+      for _ in $(seq 2 "${attempt}"); do
+        sleep_seconds=$((sleep_seconds * 2))
+        if (( sleep_seconds >= MAX_BACKOFF )); then
+          sleep_seconds=${MAX_BACKOFF}
+          break
+        fi
+      done
       sleep "${sleep_seconds}"
     fi
   done
