@@ -27,7 +27,7 @@ fetch_remote() {
         return 0
       fi
     fi
-    sleep $((attempt - 1))
+    sleep "${attempt}"
   done
 
   rm -f "${tmp_file}"
