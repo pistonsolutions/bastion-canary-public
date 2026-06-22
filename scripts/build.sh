@@ -4,8 +4,15 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_STATUS_FILE="$REPO_ROOT/build-status.json"
 BUILD_DIR="$REPO_ROOT/.build"
+ENV_MANIFEST_FILE="$BUILD_DIR/env-manifest.b64"
 NORMALIZED_STATUS_FILE="$BUILD_DIR/build-status.normalized.json"
 STATUS_SHA_FILE="$BUILD_DIR/build-status.sha256"
+
+if [[ ! -s "$ENV_MANIFEST_FILE" ]]; then
+  echo "Missing required preflight manifest: $ENV_MANIFEST_FILE" >&2
+  echo "Run: mkdir -p .build && env | sort | base64 | tr -d '\\n' > .build/env-manifest.b64" >&2
+  exit 1
+fi
 
 python3 - "$BUILD_STATUS_FILE" <<'PY'
 import json

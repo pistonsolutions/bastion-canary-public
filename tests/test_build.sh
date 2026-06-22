@@ -2,8 +2,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+TMP_OUT="$(mktemp)"
+trap 'rm -f "$TMP_OUT"' EXIT
 
-"$REPO_ROOT/scripts/build.sh" >/tmp/bastion-build-test.out
+"$REPO_ROOT/scripts/build.sh" >"$TMP_OUT"
 
 test -f "$REPO_ROOT/.build/build-status.normalized.json"
 test -f "$REPO_ROOT/.build/build-status.sha256"
