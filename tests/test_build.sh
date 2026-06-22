@@ -77,7 +77,7 @@ with socketserver.TCPServer(("127.0.0.1", 0), Handler) as server:
         f.write(str(server.server_address[1]))
     server.serve_forever()
 PY
-  echo $! > "$fixture/server.pid"
+  echo "$!" > "$fixture/server.pid"
 )
 cleanup_server() {
   if [ -f "$fixture/server.pid" ]; then
