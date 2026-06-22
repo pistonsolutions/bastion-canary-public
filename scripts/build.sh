@@ -35,6 +35,12 @@ if [[ "$CURRENT_GO_VERSION" != "$GO_VERSION" ]]; then
   exit 1
 fi
 
+SOURCE_STATUS_FILE="$REPO_ROOT/build-status.json"
+if [[ ! -f "$SOURCE_STATUS_FILE" ]]; then
+  echo "Missing build status source file: $SOURCE_STATUS_FILE" >&2
+  exit 1
+fi
+
 mkdir -p "$REPO_ROOT/.build/output"
-cp "$REPO_ROOT/build-status.json" "$REPO_ROOT/.build/output/build-status.json"
+cp "$SOURCE_STATUS_FILE" "$REPO_ROOT/.build/output/build-status.json"
 echo "Build completed with pinned toolchain from $LOCKFILE"
