@@ -10,7 +10,7 @@ trap 'rm -f "$TMP_OUT"' EXIT
 test -f "$REPO_ROOT/.build/build-status.normalized.json"
 test -f "$REPO_ROOT/.build/build-status.sha256"
 
-EXPECTED_SHA="$(cd "$REPO_ROOT/.build" && sha256sum build-status.normalized.json)"
+EXPECTED_SHA="$(cd "$REPO_ROOT/.build" && sha256sum build-status.normalized.json | awk '{print $1}')"
 ACTUAL_SHA="$(cat "$REPO_ROOT/.build/build-status.sha256")"
 
 if [[ "$EXPECTED_SHA" != "$ACTUAL_SHA" ]]; then

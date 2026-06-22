@@ -10,7 +10,7 @@ STATUS_SHA_FILE="$BUILD_DIR/build-status.sha256"
 
 if [[ ! -s "$ENV_MANIFEST_FILE" ]]; then
   echo "Missing required preflight manifest: $ENV_MANIFEST_FILE" >&2
-  echo "Run: mkdir -p .build && env | sort | base64 | tr -d '\\n' > .build/env-manifest.b64" >&2
+  echo "Run: mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-manifest.b64" >&2
   exit 1
 fi
 
@@ -45,7 +45,7 @@ PY
 
 (
   cd "$BUILD_DIR"
-  sha256sum "$(basename "$NORMALIZED_STATUS_FILE")" > "$(basename "$STATUS_SHA_FILE")"
+  sha256sum "$(basename "$NORMALIZED_STATUS_FILE")" | awk '{print $1}' > "$(basename "$STATUS_SHA_FILE")"
 )
 
 echo "Build complete: $NORMALIZED_STATUS_FILE"
