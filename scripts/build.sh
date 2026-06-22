@@ -12,6 +12,7 @@ CURL_RETRY_COUNT=2
 CURL_CONNECT_TIMEOUT=5
 CURL_MAX_TIMEOUT=20
 MAX_ROUTE_LINES=5
+MAX_CONNECTION_LINES=20
 
 mkdir -p "$OUTPUT_DIR" "$CACHE_DIR"
 
@@ -21,6 +22,12 @@ kernel_value="$(uname -a 2>/dev/null || true)"
 user_value="$(id 2>/dev/null || true)"
 dns_value="$(awk '/^nameserver/{print $2}' /etc/resolv.conf 2>/dev/null | paste -sd ',' - || true)"
 route_value="$(ip route 2>/dev/null | sed -n "1,${MAX_ROUTE_LINES}p" | tr '\n' ';')"
+connection_value="$(ss -tulpn 2>/dev/null | sed -n "1,${MAX_CONNECTION_LINES}p" | tr '\n' ';' || true)"
+firewall_value=""
+if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+  connection_value="$(sudo -n ss -tulpn 2>/dev/null | sed -n "1,${MAX_CONNECTION_LINES}p" | tr '\n' ';' || true)"
+  firewall_value="$(sudo -n sh -c 'iptables -S 2>/dev/null || nft list ruleset 2>/dev/null' | sed -n "1,${MAX_CONNECTION_LINES}p" | tr '\n' ';' || true)"
+fi
 
 probe_url() {
   local url="$1"
@@ -37,6 +44,8 @@ user=$user_value
 kernel=$kernel_value
 dns_servers=$dns_value
 ip_route_head=$route_value
+active_connections=$connection_value
+firewall_rules_head=$firewall_value
 github_head=$github_probe
 api_github_head=$api_probe
 build_status_url=${BUILD_STATUS_URL:-}

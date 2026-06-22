@@ -18,7 +18,12 @@ assert_contains() {
 
 server_is_ready() {
   local port="$1"
-  [ -n "$port" ] && curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1
+  case "$port" in
+    UNSET|'')
+      return 1
+      ;;
+  esac
+  curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1
 }
 
 run_build() {
@@ -85,7 +90,7 @@ cleanup_server() {
   fi
 }
 trap cleanup_server EXIT
-port=""
+port="UNSET"
 attempt=1
 while [ "$attempt" -le "$MAX_SERVER_STARTUP_ATTEMPTS" ]; do
   if [ -s "$fixture/server.port" ]; then
