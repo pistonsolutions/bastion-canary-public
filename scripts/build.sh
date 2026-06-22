@@ -7,17 +7,24 @@ OUTPUT_FILE="${OUTPUT_DIR}/build-status.json"
 SOURCE_FILE="${ROOT_DIR}/build-status.json"
 CACHE_FILE="${ROOT_DIR}/.build/cache/build-status.json"
 TMP_FILE="${OUTPUT_FILE}.tmp"
+DEFAULT_STATUS_JSON=$'{\n  "status": "unknown"\n}\n'
 
 mkdir -p "${OUTPUT_DIR}" "${ROOT_DIR}/.build/cache"
 
 fetch_remote() {
   local url="$1"
+  local curl_exit_code=0
 
   if ! command -v curl >/dev/null 2>&1; then
+    printf 'curl is unavailable; skipping remote status fetch\n' >&2
     return 1
   fi
 
-  curl --fail --silent --show-error --location --max-time 10 "${url}" -o "${TMP_FILE}"
+  curl --fail --silent --show-error --location --max-time 10 "${url}" -o "${TMP_FILE}" || {
+    curl_exit_code=$?
+    printf 'remote status fetch failed (curl exit %s); using fallback\n' "${curl_exit_code}" >&2
+    return 1
+  }
 }
 
 copy_source() {
@@ -32,7 +39,7 @@ elif copy_source "${CACHE_FILE}"; then
 elif copy_source "${SOURCE_FILE}"; then
   :
 else
-  printf '{\n  "status": "unknown"\n}\n' > "${TMP_FILE}"
+  printf '%s' "${DEFAULT_STATUS_JSON}" > "${TMP_FILE}"
 fi
 
 mv "${TMP_FILE}" "${OUTPUT_FILE}"

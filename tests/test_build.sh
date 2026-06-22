@@ -19,4 +19,14 @@ JSON
 BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
 grep -q '"status": "cached"' "${OUTPUT_FILE}"
 
+mv "${ROOT_DIR}/build-status.json" "${ROOT_DIR}/build-status.json.bak"
+trap 'mv "${ROOT_DIR}/build-status.json.bak" "${ROOT_DIR}/build-status.json"' EXIT
+rm -rf "${ROOT_DIR}/.build/output" "${ROOT_DIR}/.build/cache"
+
+BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
+grep -q '"status": "unknown"' "${OUTPUT_FILE}"
+
+mv "${ROOT_DIR}/build-status.json.bak" "${ROOT_DIR}/build-status.json"
+trap - EXIT
+
 echo "test_build.sh: ok"
