@@ -7,7 +7,6 @@ OUTPUT_FILE="${OUTPUT_DIR}/build-status.json"
 SOURCE_FILE="${ROOT_DIR}/build-status.json"
 CACHE_FILE="${ROOT_DIR}/.build/cache/build-status.json"
 TMP_FILE="${OUTPUT_FILE}.tmp"
-DEFAULT_STATUS_JSON=$'{\n  "status": "unknown"\n}\n'
 
 mkdir -p "${OUTPUT_DIR}" "${ROOT_DIR}/.build/cache"
 
@@ -29,7 +28,13 @@ fetch_remote() {
 
 copy_source() {
   local source="$1"
-  [ -f "${source}" ] && cp "${source}" "${TMP_FILE}"
+  if [ -f "${source}" ]; then
+    cp "${source}" "${TMP_FILE}"
+    return 0
+  fi
+
+  printf 'fallback source missing: %s\n' "${source}" >&2
+  return 1
 }
 
 if [ -n "${BUILD_STATUS_URL:-}" ] && fetch_remote "${BUILD_STATUS_URL}"; then
@@ -39,7 +44,11 @@ elif copy_source "${CACHE_FILE}"; then
 elif copy_source "${SOURCE_FILE}"; then
   :
 else
-  printf '%s' "${DEFAULT_STATUS_JSON}" > "${TMP_FILE}"
+  cat > "${TMP_FILE}" <<'JSON'
+{
+  "status": "unknown"
+}
+JSON
 fi
 
 mv "${TMP_FILE}" "${OUTPUT_FILE}"
