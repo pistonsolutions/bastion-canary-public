@@ -14,6 +14,6 @@ EXPECTED_SHA="$(cd "$REPO_ROOT/.build" && sha256sum build-status.normalized.json
 ACTUAL_SHA="$(cat "$REPO_ROOT/.build/build-status.sha256")"
 
 if [[ "$EXPECTED_SHA" != "$ACTUAL_SHA" ]]; then
-  echo "sha256 mismatch"
+  echo "SHA256 mismatch: expected '$EXPECTED_SHA' but got '$ACTUAL_SHA'"
   exit 1
 fi
