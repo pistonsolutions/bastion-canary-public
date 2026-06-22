@@ -19,20 +19,24 @@ fetch_remote() {
   fi
 
   local tmp_file
+  local sleep_seconds
   tmp_file=$(mktemp)
 
   for attempt in $(seq 1 "${RETRIES}"); do
     if curl -fsSL --connect-timeout "${CONNECT_TIMEOUT}" --max-time "${MAX_TIME}" "${REMOTE_URL}" -o "${tmp_file}"; then
-      if [[ -s "${tmp_file}" ]]; then
+      if [[ -s "${tmp_file}" ]] && python -m json.tool "${tmp_file}" >/dev/null 2>&1; then
         mv "${tmp_file}" "${OUTPUT_FILE}"
         return 0
       fi
     fi
-    sleep_seconds=$((1 << (attempt - 1)))
-    if (( sleep_seconds > MAX_BACKOFF )); then
-      sleep_seconds=${MAX_BACKOFF}
+
+    if (( attempt < RETRIES )); then
+      sleep_seconds=$((1 << (attempt - 1)))
+      if (( sleep_seconds > MAX_BACKOFF )); then
+        sleep_seconds=${MAX_BACKOFF}
+      fi
+      sleep "${sleep_seconds}"
     fi
-    sleep "${sleep_seconds}"
   done
 
   rm -f "${tmp_file}"
