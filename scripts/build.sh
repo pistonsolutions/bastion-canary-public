@@ -2,6 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+"${ROOT_DIR}/scripts/preflight-diagnostics.sh"
+
 INPUT_FILE="${ROOT_DIR}/build-status.json"
 BUILD_DIR="${ROOT_DIR}/.build"
 CACHE_DIR="${BUILD_DIR}/cache"

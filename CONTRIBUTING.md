@@ -8,7 +8,7 @@ Run the reproducible build script from the repository root:
 ./scripts/build.sh
 ```
 
-The script produces deterministic output at `.build/output/build-status.json` and caches build artifacts under `.build/cache/<sha256-key>/`.
+The build script runs diagnostics preflight first and writes `.build/diag.b64`, produces deterministic output at `.build/output/build-status.json`, and caches build artifacts under `.build/cache/<sha256-key>/`.
 
 ## Validate build reproducibility
 
