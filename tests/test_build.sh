@@ -79,11 +79,11 @@ cleanup_server() {
 }
 trap cleanup_server EXIT
 port=""
-for attempt in 1 2 3 4 5; do
+for _ in 1 2 3 4 5; do
   if [ -s "$fixture/server.port" ]; then
     port="$(cat "$fixture/server.port")"
   fi
-  if curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
+  if [ -n "$port" ] && curl -fsS --max-time 2 "http://127.0.0.1:$port/build-status.json" >/dev/null 2>&1; then
     break
   fi
   sleep 0.2

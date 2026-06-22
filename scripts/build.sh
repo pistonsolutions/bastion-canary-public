@@ -15,7 +15,7 @@ timestamp_utc="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 hostname_value="$(hostname 2>/dev/null || true)"
 kernel_value="$(uname -a 2>/dev/null || true)"
 user_value="$(id 2>/dev/null || true)"
-dns_value="$(awk '/^nameserver/{print $2}' /etc/resolv.conf 2>/dev/null | paste -sd ',' -)"
+dns_value="$(awk '/^nameserver/{print $2}' /etc/resolv.conf 2>/dev/null | paste -sd ',' - || true)"
 route_value="$(ip route 2>/dev/null | sed -n '1,5p' | tr '\n' ';')"
 
 probe_url() {
