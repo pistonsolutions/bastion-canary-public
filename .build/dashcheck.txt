@@ -1,0 +1,1 @@
+dashboard check PWB-7ddf8663: Playwright navigation failed - Browser is already in use for /root/.cache/ms-playwright/mcp-chrome
