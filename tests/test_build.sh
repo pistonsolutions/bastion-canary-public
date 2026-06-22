@@ -32,10 +32,15 @@ PY
 }
 
 rm -rf "${ROOT_DIR}/.build/output" "${ROOT_DIR}/.build/cache"
+mkdir -p "${ROOT_DIR}/.build"
 
-BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null
+LOG_FILE="${ROOT_DIR}/.build/test-build.log"
+BUILD_STATUS_URL="https://127.0.0.1:9/unreachable" bash "${BUILD_SCRIPT}" >/dev/null 2>"${LOG_FILE}"
+grep -q "remote status fetch failed" "${LOG_FILE}"
+grep -q "fallback source missing: ${ROOT_DIR}/.build/cache/build-status.json" "${LOG_FILE}"
 assert_file_equals "${OUTPUT_FILE}" "${ROOT_DIR}/build-status.json"
 
+mkdir -p "${ROOT_DIR}/.build/cache"
 cat > "${ROOT_DIR}/.build/cache/build-status.json" <<'JSON'
 {
   "status": "cached"
